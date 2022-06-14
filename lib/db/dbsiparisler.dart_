@@ -1,0 +1,66 @@
+import 'package:path/path.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:karakaya_soguk/model/siparismodel.dart';
+
+class DbSiparis {
+  static Database _database;
+
+  String _tablo = "stokhareket";
+
+  Future<Database> get database async {
+    if (_database != null) return _database;
+
+    // if _database is null we instantiate it
+    _database = await initializeDatabase();
+    return _database;
+  }
+
+  static const stokhareket =
+      'CREATE TABLE stokhareket (shid int PRIMARY key, tarih TEXT,stokkod TEXT,carikod TEXT, sipno TEXT,miktar TEXT);';
+  Future<Database> initializeDatabase() async {
+    print("initDB executed");
+    //Directory documentsDirectory = await getApplicationDocumentsDirectory();
+    String path = join(await getDatabasesPath(), "karakayadb.db");
+    await deleteDatabase(path);
+    return await openDatabase(path, version: 2,
+        onCreate: (Database db, int version) async {
+      await db.execute(stokhareket);
+    });
+  }
+
+  //Crud Methods
+  Future<List> siparisliste() async {
+    var dbClient = await this.database;
+    var result = await dbClient.rawQuery('SELECT * FROM $_tablo');
+    print(result);
+    return result.toList();
+  }
+
+  Future<List> siparisara(String gelen) async {
+    // print(gelen);
+    var dbClient = await this.database;
+    var result = await dbClient
+        .rawQuery("SELECT * FROM $_tablo where firma like '%" + gelen + "%'");
+    //print(result);
+    return result.toList();
+  }
+
+  Future<int> insert(Siparismodel note) async {
+    Database db = await this.database;
+    var result = await db.insert("$_tablo", note.toMap());
+    return result;
+  }
+
+  Future<int> delete(int sid) async {
+    Database db = await this.database;
+    var result = await db.rawDelete("delete from $_tablo where sid=$sid");
+    return result;
+  }
+
+  Future<int> update(Siparismodel note) async {
+    Database db = await this.database;
+    var result = await db.update("$_tablo", note.toMap(),
+        where: "shid=?", whereArgs: [note.shid]);
+    return result;
+  }
+}

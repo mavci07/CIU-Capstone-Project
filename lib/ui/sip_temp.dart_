@@ -1,0 +1,115 @@
+import 'package:flutter/material.dart';
+import 'package:karakaya_soguk/db/dbsiparisler.dart';
+import 'package:karakaya_soguk/model/siparismodel.dart';
+
+class Siparisler extends StatefulWidget {
+  @override
+  _ListViewNoteState createState() => new _ListViewNoteState();
+}
+
+class _ListViewNoteState extends State<Siparisler> {
+  List<Siparismodel> items = new List();
+  List<Siparismodel> bul = new List();
+  DbSiparis db = new DbSiparis();
+  @override
+  void initState() {
+    super.initState();
+
+    db.siparisliste().then((notes) {
+      setState(() {
+        notes.forEach((note) {
+          items.add(Siparismodel.fromMap(note));
+          bul.add(Siparismodel.fromMap(note));
+        });
+      });
+    });
+  }
+
+  onItemChanged(String value) {
+    setState(() {
+      bul = items
+          .where((string) =>
+              string.firma.toLowerCase().contains(value.toLowerCase()))
+          .toList();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        body: new Column(children: <Widget>[
+      new TextFormField(
+        decoration: InputDecoration(hintText: 'Sipariş No veya Ünvan Giriniz'),
+        onChanged: onItemChanged,
+      ),
+      Row(
+        children: <Widget>[
+          Container(
+              margin: EdgeInsets.fromLTRB(10, 0, 0, 0),
+              width: 50,
+              child: Text('sira')),
+          Container(
+            margin: EdgeInsets.fromLTRB(10, 0, 0, 0),
+            width: 200,
+            child: Text('firma'),
+          ),
+          Container(
+              margin: EdgeInsets.fromLTRB(10, 0, 0, 0),
+              width: 50,
+              child: Text('miktar'))
+        ],
+      ),
+      new Expanded(
+        child: ListView.builder(
+            itemCount: bul.length,
+            padding: EdgeInsets.symmetric(vertical: .5),
+            itemBuilder: (context, position) {
+              return Container(
+                child: Column(
+                  children: <Widget>[
+                    Column(children: [
+                      //Text("adsfasf"),
+                      GestureDetector(
+                          onTap: () => {print('${items[position].sid}')},
+                          child: Card(
+                            shape: RoundedRectangleBorder(
+                              side: BorderSide(color: Colors.white70, width: 1),
+                              borderRadius: BorderRadius.circular(0),
+                            ),
+                            child: Row(
+                              children: <Widget>[
+                                Container(
+                                    margin: EdgeInsets.all(10),
+                                    width: 50,
+                                    child: Text('99999')),
+                                Container(
+                                  margin: EdgeInsets.all(10),
+                                  width: 200,
+                                  child: Text('${items[position].firma}'),
+                                ),
+                                Container(
+                                    margin: EdgeInsets.all(10),
+                                    width: 20,
+                                    child: Text('${items[position].sid}'))
+                              ],
+                            ),
+                          ))
+                    ]),
+                  ],
+                ),
+              );
+            }),
+      ),
+    ]
+            // floatingActionButton: FloatingActionButton(
+            //   child: Icon(Icons.add),
+            //   onPressed: () {
+            //     Navigator.push(
+            //       context,
+            //       MaterialPageRoute(builder: (context) => MainMenu()),
+            //     );
+            //   },
+            // ),
+            ));
+  }
+}
