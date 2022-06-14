@@ -1,6 +1,5 @@
-# karakaya_soguk
+CIU Capstone Project
 
-A new Flutter project.
 
 ## Getting Started
 
